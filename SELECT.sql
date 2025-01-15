@@ -12,7 +12,7 @@ WHERE song_duration >= 210
 -- Задание 2.3
 SELECT collection_name
 FROM collection
-WHERE date_release BETWEEN '2018-12-31' AND '2020-12-31'
+WHERE date_release BETWEEN '2018-01-01' AND '2020-12-31'
 
 -- Задание 2.4
 SELECT singer_name
@@ -20,9 +20,8 @@ FROM singers
 WHERE singer_name NOT LIKE '% %'
 
 -- Задание 2.5
-SELECT song_name
-FROM songs
-WHERE song_name LIKE '%мой%' OR song_name LIKE '%my%'
+SELECT song_name FROM songs
+WHERE string_to_array(LOWER(song_name), ' ') && ARRAY['мой', 'my']
 
 -- Задание 3.1
 SELECT genre.genre_name, COUNT(singer_id) FROM genre
@@ -41,14 +40,13 @@ GROUP BY albums.album_name
 ORDER BY AVG(song_duration)
 
 -- Задание 3.4
--- По данной выборке вопрос. У Киркорова 2 альбома, первый в 2019, второй 2020 выпущен. Его выборка выводит, т.к. условие
--- выполняется частично из за альбома 2019 года. Если в фильтре WHERE убрать NOT - выдаст одного Киркорова из за его второго альбама 2020 года.
--- Возможно ли как-то полностью исключить Киркорова, т.к. один из его альбомов попадает под часть условия, а именно 2020 год.
-SELECT singer_name FROM singers
-JOIN singers_album ON singers.singer_id = singers_album.singer_id
-JOIN albums ON singers_album.album_id = albums.album_id
-WHERE singer_name NOT IN (SELECT singer_name FROM singers_album WHERE year_of_release > '2020-01-01' AND year_of_release < '2021-01-01')
-GROUP BY singer_name
+SELECT singer_name 
+FROM singers
+WHERE singer_id NOT IN (
+	SELECT singer_id FROM singers_album
+	JOIN albums ON singers_album.album_id = albums.album_id
+	WHERE albums.year_of_release >= '2020-01-01' AND albums.year_of_release < '2021-01-01'
+	);
 
 -- Задание 3.5
 SELECT collection_name FROM collection
